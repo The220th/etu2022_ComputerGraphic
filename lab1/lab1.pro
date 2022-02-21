@@ -3,7 +3,7 @@ QT += core gui
 QT += widgets
 
 CONFIG += c++11
-TARGET = test
+TARGET = lab1
 TEMPLATE = app
 
 

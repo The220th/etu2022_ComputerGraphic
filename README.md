@@ -1,11 +1,12 @@
 # etu2022_ComputerGraphic. Временный README.md
+
 etu 2022 subject = Computer graphic
 
 Используется `QT`:
 
-- [Установка](https://github.com/The220th/SharedLib/blob/main/cpp/QT/INSTALL.md)
+- [Установка](https://github.com/The220th/SharedLib/blob/main/cpp/QT/INSTALL.md) <- тык
 
-- В директории, где есть файл `что-то.pro` выполнить
+- В директории, где есть файл `что-то.pro` выполнить:
 
 ``` bash
 > qmake

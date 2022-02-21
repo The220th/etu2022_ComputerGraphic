@@ -13,6 +13,9 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent)
     o1 = NULL;
     o2 = NULL;
     cas1 = NULL;
+    cas2 = NULL;
+    cas3 = NULL;
+    cas4 = NULL;
 
     resize(W, H);
     this->setStyleSheet("background-color: rgb(200,200,200); margin:0px; border:1px solid rgb(0, 0, 0); ");
@@ -26,6 +29,12 @@ DrawField::~DrawField()
         delete o2;
     if(cas1 != NULL)
         delete cas1;
+    if(cas2 != NULL)
+        delete cas2;
+    if(cas3 != NULL)
+        delete cas3;
+    if(cas4 != NULL)
+        delete cas4;
 }
  
 void DrawField::paintEvent(QPaintEvent *e)
@@ -51,8 +60,11 @@ void DrawField::paintEvent(QPaintEvent *e)
 
 
 void DrawField::init(int x01, int y01, int r1, 
-              int x02, int y02, int r2, 
-              int lx1, int ly1, int lx2, int ly2, 
+              int x02, int y02, int r2,
+              int l1x1, int l1y1, int l1x2, int l1y2,
+              int l2x1, int l2y1, int l2x2, int l2y2,
+              int l3x1, int l3y1, int l3x2, int l3y2,
+              int l4x1, int l4y1, int l4x2, int l4y2,
               sOriginPlane cb)
 {
     if(o1 != NULL)
@@ -61,10 +73,19 @@ void DrawField::init(int x01, int y01, int r1,
         delete o2;
     if(cas1 != NULL)
         delete cas1;
+    if(cas2 != NULL)
+        delete cas2;
+    if(cas3 != NULL)
+        delete cas3;
+    if(cas4 != NULL)
+        delete cas4;
     
     o1 = new sCircle(x01, y01, r1, cb);
     o2 = new sCircle(x02, y02, r2, cb);
-    cas1 = new sLine(lx1, ly1, lx2, ly2, cb);
+    cas1 = new sLine(l1x1, l1y1, l1x2, l1y2, cb);
+    cas2 = new sLine(l2x1, l2y1, l2x2, l2y2, cb);
+    cas3 = new sLine(l3x1, l3y1, l3x2, l3y2, cb);
+    cas4 = new sLine(l4x1, l4y1, l4x2, l4y2, cb);
 }
 
 void DrawField::drawLines(QPainter *qp)
@@ -76,13 +97,19 @@ void DrawField::drawLines(QPainter *qp)
     if(
         o1 != NULL &&
         o2 != NULL &&
-        cas1 != NULL
+        cas1 != NULL &&
+        cas2 != NULL &&
+        cas3 != NULL &&
+        cas4 != NULL
     )
     {
         o1->sdraw(*qp);
         //std::cout << 132 << std::endl;
         o2->sdraw(*qp);
         cas1->sdraw(*qp);
+        cas2->sdraw(*qp);
+        cas3->sdraw(*qp);
+        cas4->sdraw(*qp);
     }
 }
 

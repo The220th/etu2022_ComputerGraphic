@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QGridLayout>
 #include <QDialog>
+#include <cmath>
 
 #include <string>
 
@@ -103,16 +104,39 @@ void SettingPanel::check_and_start()
 
 
     int x01, y01, x02, y02, r1, r2;
-    x01 = bX1->text().toInt();
-    y01 = bY1->text().toInt();
-    r1 = bR1->text().toInt();
-    x02 = bX2->text().toInt();
-    y02 = bY2->text().toInt();
-    r2 = bR2->text().toInt();
+    bool is_ok, res_ok = false;
+    x01 = bX1->text().toInt(&is_ok); res_ok += !is_ok;
+    y01 = bY1->text().toInt(&is_ok); res_ok += !is_ok;
+    r1 = bR1->text().toInt(&is_ok); res_ok += !is_ok;
+    x02 = bX2->text().toInt(&is_ok); res_ok += !is_ok;
+    y02 = bY2->text().toInt(&is_ok); res_ok += !is_ok;
+    r2 = bR2->text().toInt(&is_ok); res_ok += !is_ok;
     
     int cb_x, cb_y;
-    cb_x = bShiftX->text().toInt();
-    cb_y = bShiftY->text().toInt();
+    cb_x = bShiftX->text().toInt(&is_ok); res_ok += !is_ok;
+    cb_y = bShiftY->text().toInt(&is_ok); res_ok += !is_ok;
+    res_ok = !res_ok;
+
+    if(res_ok != true)
+    {
+        ifFailed(string("There is not int in one of the fields"));
+        return;
+    }
+
+    if(r1 <= 0 || r2 <= 0)
+    {
+        ifFailed(string("The radius must be a positive number"));
+        return;
+    }
+
+    double d = ((double)x01 - (double)x02)*((double)x01 - (double)x02);
+    d += ((double)y01 - (double)y02)*((double)y01 - (double)y02);
+    d = sqrt( d );
+    if( d <= r1 + r2)
+    {
+        ifFailed(string("The circles should not be nested or touch"));
+        return;
+    }
 
     sOriginPlane cb(cb_x, cb_y);
 
@@ -122,10 +146,16 @@ void SettingPanel::check_and_start()
     //sCircle *o2 = new sCircle(*xo2, r2, cb);
     //o1.sdraw(*qp); o2.sdraw(*qp);
 
-    sPoint line1 = sPoint(0, 0, cb);
-    sPoint line2 = sPoint(0, 0, cb);
+    sPoint line11 = sPoint(0, 0, cb);
+    sPoint line12 = sPoint(0, 0, cb);
+    sPoint line21 = sPoint(0, 0, cb);
+    sPoint line22 = sPoint(0, 0, cb);
+    sPoint line31 = sPoint(0, 0, cb);
+    sPoint line32 = sPoint(0, 0, cb);
+    sPoint line41 = sPoint(0, 0, cb);
+    sPoint line42 = sPoint(0, 0, cb);
 
-    solve_nonlinear_system(xo1, r1, xo2, r2, &line1, &line1, &line1, &line1, &line1, &line1, &line1, &line2);
+    solve_nonlinear_system(xo1, r1, xo2, r2, &line11, &line12, &line21, &line22, &line31, &line32, &line41, &line42);
 
     //sLine *l1 = new sLine(*line1, *line2, cb);
 
@@ -133,7 +163,10 @@ void SettingPanel::check_and_start()
 
     (p->getDrawField())->init(x01, y01, r1,
     x02, y02, r2,
-    line1.getX(), line1.getY(), line2.getX(), line2.getY(),
+    line11.getX(), line11.getY(), line12.getX(), line12.getY(),
+    line21.getX(), line21.getY(), line22.getX(), line22.getY(),
+    line31.getX(), line31.getY(), line32.getX(), line32.getY(),
+    line41.getX(), line41.getY(), line42.getX(), line42.getY(),
     cb);
     (p->getDrawField())->update();
 

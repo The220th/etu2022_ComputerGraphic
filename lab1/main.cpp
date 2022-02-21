@@ -1,4 +1,6 @@
 #include <QApplication>
+#include <QIcon>
+
 //#include "./shapes/shapes"
 //#include "./include/drawField.h"
 //#include "./include/settingPanel.h"
@@ -14,8 +16,10 @@ int main(int argc, char *argv[])
     //SettingPanel window;
     MainWindow window;
 
-    //window.resize(280, 270);
-    window.setWindowTitle("Lab1");
+    window.setWindowTitle("lab1");
+    window.resize(1000, 750);
+    window.setWindowIcon(QIcon("./imgsrc/ico.png"));
+
     window.show();
 
     return app.exec();
