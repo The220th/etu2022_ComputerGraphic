@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 #include "../include/drawField.h"
 
@@ -12,6 +13,9 @@ using namespace std;
 
 DrawField::DrawField(QWidget *parent) : QWidget(parent)
 {
+    stepDrawing = false;
+    progressDrawing = 50;
+
     all_p = new list<sPoint*>();
 
     resize(W, H);
@@ -40,7 +44,15 @@ void DrawField::drawH(QPainter& qp)
         drawPoint(*el, qp);
 
     if(all_p->size() > 1)
+    {
         drawBeze(qp);
+
+        if(stepDrawing)
+        {
+            float val = progressDrawing / 100.0f;
+            drawBezeInteractive(qp, val);
+        }
+    }
 }
 
 sPoint DrawField::beze_n1(sPoint p0, sPoint p1, float progress)
@@ -61,9 +73,70 @@ sPoint DrawField::beze_n1(sPoint p0, sPoint p1, float progress)
     return res;
 }
 
+void DrawField::clearAllPoints()
+{
+    all_p->clear();
+    update();
+}
+
+void DrawField::changeProgress_ui_beze(int progress)
+{
+    //std::cout << progress << std::endl;
+    progressDrawing = progress;
+    update();
+}
+
+void DrawField::drawBezeInteractive(QPainter& qp, float progress)
+{
+    double t = progress;
+
+    list<sPoint> buff_l;
+    for(sPoint *el : *all_p)
+        buff_l.push_back(*el);
+
+    int c = 0;
+    int n = buff_l.size();
+    while(buff_l.size() != 1)
+    {
+        if(c == n-1)
+        {
+            buff_l.pop_front();
+            n = buff_l.size();
+            c = 0;
+        }
+        else
+        {
+            sPoint p0 = buff_l.front();
+            buff_l.pop_front();
+            sPoint p1 = buff_l.front();
+
+            printLine(p0, p1, qp);
+
+            sPoint p = beze_n1(p0, p1, t);
+
+            buff_l.push_back(p);
+            ++c;
+        }
+    }
+
+    sPoint res_p = buff_l.front();
+
+    QColor colo = QColor(255, 10, 10);
+    drawPoint(res_p, qp, &colo);
+    //qp.drawPoint(res_p.getX(), res_p.getY());
+}
+
+void DrawField::setStepDrawind(bool isStep)
+{
+    stepDrawing = isStep;
+    update();
+}
+
 void DrawField::drawBeze(QPainter& qp)
 {
-    for(double t = 0.0; t < 1.0; t += 0.002)
+    // https://www.cat-in-web.ru/bezier-curves/
+    double dt = 1.0/( 500 * (all_p->size()) );
+    for(double t = 0.0; t < 1.0; t += dt)
     {
         list<sPoint> buff_l;
         for(sPoint *el : *all_p)
@@ -95,7 +168,8 @@ void DrawField::drawBeze(QPainter& qp)
     }
 }
 
-void DrawField::mouseReleaseEvent(QMouseEvent* m_event)
+//void DrawField::mouseReleaseEvent(QMouseEvent* m_event)
+void DrawField::mousePressEvent(QMouseEvent* m_event)
 {
     /*Q_UNUSED(m_event);
     int m_x = QCursor::pos().x();
@@ -116,15 +190,41 @@ void DrawField::mouseReleaseEvent(QMouseEvent* m_event)
 
     //int x = m_event->x();
     //int y = m_event->y();
-    int x = rightRound(m_event->position().x());
-    int y = rightRound(m_event->position().y());
 
-    sPoint* p = new sPoint(x, y);
+    //if(m_event->buttons() == Qt::LeftButton)
+    if(m_event->buttons() == Qt::RightButton)
+    {
+        if(!all_p->empty())
+        {
+            int x = rightRound(m_event->position().x());
+            int y = rightRound(m_event->position().y());
 
-    all_p->push_back(p);
+            double S_min = std::numeric_limits<double>::infinity();
+            sPoint* p_min = NULL;
+            for(sPoint* near_p : *all_p)
+            {
+                double d_cur = (near_p->getX() - x)*(near_p->getX() - x) + (near_p->getY() - y)*(near_p->getY() - y);
+                if(d_cur < S_min)
+                {
+                    S_min = d_cur;
+                    p_min = near_p;
+                }
+            }
+            p_min->setX(x);
+            p_min->setY(y);
+        }
+    }
+    else
+    {
+        int x = rightRound(m_event->position().x());
+        int y = rightRound(m_event->position().y());
 
-    //cout << "Clicked " << x << " " << y << endl;
+        sPoint* p = new sPoint(x, y);
 
+        all_p->push_back(p);
+
+        //cout << "Clicked " << x << " " << y << endl;
+    }
     update();
 }
 
@@ -161,8 +261,16 @@ void DrawField::printLine(const sPoint& p0, const sPoint& p1, QPainter& pen)
     }
 }
 
-void DrawField::drawPoint(const sPoint& p, QPainter& qp)
+void DrawField::drawPoint(const sPoint& p, QPainter& qp, QColor *colo/* = 0*/)
 {
+    QPen prevPen = qp.pen();
+
+    if(colo != 0)
+    {
+        QPen curPen = QPen(*colo);
+        qp.setPen(curPen);
+    }
+
     int x0 = p.x();
     int y0 = p.y();
     int r = 5;
@@ -186,4 +294,6 @@ void DrawField::drawPoint(const sPoint& p, QPainter& qp)
         qp.drawPoint(x, y1);
         qp.drawPoint(x, y2);
     }
+
+    qp.setPen(prevPen);
 }

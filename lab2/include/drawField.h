@@ -19,17 +19,24 @@ class DrawField : public QWidget
     const unsigned W = 300;
     const unsigned H = 350;
 
+    bool stepDrawing;
+    int progressDrawing;
+
     std::list<sPoint*> *all_p;
 
   public:
     DrawField(QWidget *parent = 0);
     ~DrawField();
+
+    void clearAllPoints();
+    void changeProgress_ui_beze(int progress);
+    void setStepDrawind(bool isStep);
  
   private:
     void paintEvent(QPaintEvent *event);
     void printLine(const sPoint& p0, const sPoint& p1, QPainter& pen);
 
-    void drawPoint(const sPoint& p, QPainter& qp);
+    void drawPoint(const sPoint& p, QPainter& qp, QColor *colo = 0);
 
     void drawH(QPainter& qp);
 
@@ -40,7 +47,8 @@ class DrawField : public QWidget
     void drawBezeInteractive(QPainter& qp, float progress);
 
   protected:
-    void mouseReleaseEvent(QMouseEvent* m_event);
+    //void mouseReleaseEvent(QMouseEvent* m_event);
+    void mousePressEvent(QMouseEvent* m_event);
 };
 
 #endif // DRAWFIELD_H
