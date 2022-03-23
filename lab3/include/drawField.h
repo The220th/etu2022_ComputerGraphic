@@ -60,6 +60,15 @@ class DrawField : public QWidget
     void put_putted_point();
     void move_to_putted_point();
 
+    Matrix<double> Rx;
+    Matrix<double> Ry;
+    void refresh_RotaredMatrix();
+    void putBezierRotated();
+    sPoint calcBezierSumRotated(double u, double v);
+    double angleX;
+    double angleY;
+    bool isROTATE;
+
   public:
     DrawField(QWidget *parent = 0);
     ~DrawField();

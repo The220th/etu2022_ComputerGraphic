@@ -16,8 +16,10 @@
 
 using namespace std;
 
-DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
+DrawField::DrawField(QWidget *parent) : QWidget(parent), cam(), Rx(3, 3), Ry(3, 3)
 {
+    setMinimumSize(W,H);
+    setMaximumSize(W,H);
     resize(W, H);
     this->setStyleSheet("margin:0px; border:1px solid rgb(0, 0, 0); ");
     
@@ -38,6 +40,8 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
 
     d_2NewPoint = 10; // !!!
     puttedPoint.setX(0); puttedPoint.setY(0); puttedPoint.setZ(0);
+
+    angleX = 0; angleY = 0; isROTATE = false;
 
     display = new int*[H];
     for(size_t li = 0; li < H; ++li)
@@ -81,7 +85,11 @@ void DrawField::paintEvent(QPaintEvent *e)
             putSphere(*(bezier[li][lj]), (BEZIER_BUILDED?pointR_after:pointR_before));
 
     if(BEZIER_BUILDED)
+    {
         putBezier();
+        if(isROTATE)
+            putBezierRotated();
+    }
 
 
     QPainter qp(this);
@@ -180,6 +188,30 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     else if(key == Qt::Key_X)
     {
         d_2NewPoint += 1;
+    }
+    else if(key == Qt::Key_R)
+    {
+        angleX += dd;
+        refresh_RotaredMatrix();
+    }
+    else if(key == Qt::Key_F)
+    {
+        angleX -= dd;
+        refresh_RotaredMatrix();
+    }
+    else if(key == Qt::Key_T)
+    {
+        angleY -= dd;
+        refresh_RotaredMatrix();
+    }
+    else if(key == Qt::Key_G)
+    {
+        angleY += dd;
+        refresh_RotaredMatrix();
+    }
+    else if(key == Qt::Key_V)
+    {
+        isROTATE = !isROTATE;
     }
     else if(key == Qt::Key_N)
     {
@@ -512,4 +544,73 @@ sPoint DrawField::calcBezierSum(double u, double v)
     }
     
     return sPoint(sum_i_x, sum_i_y, sum_i_z);
+}
+
+void DrawField::putBezierRotated()
+{
+    double u, v;
+
+    for(u = 0; u <= 1.0; u+=0.1)
+        for(v = 0; v <= 1.0; v+=0.001)
+            putPoint(calcBezierSumRotated(u, v));
+
+    for(v = 0; v <= 1.0; v+=0.1)
+        for(u = 0; u <= 1.0; u+=0.001)
+            putPoint(calcBezierSumRotated(u, v));
+}
+
+sPoint DrawField::calcBezierSumRotated(double u, double v)
+{
+    double buff;
+    double buff_i;
+    double buff_j;
+
+    double sum_i_x = 0, sum_i_y = 0, sum_i_z = 0;
+    double sum_j_x = 0, sum_j_y = 0, sum_j_z = 0;
+
+    for(size_t i = 0; i <= BEZIER_N; ++i)
+    {
+        sum_j_x = 0; sum_j_y = 0; sum_j_z = 0;
+        for(size_t j = 0; j <= BEZIER_M; ++j)
+        {
+            buff_i = bcr->get_bcr(BEZIER_N, i);
+            buff_i *= fast_pow(u, i) * fast_pow((1.0-u), (BEZIER_N-i));
+            
+
+            buff_j = bcr->get_bcr(BEZIER_M, j);
+            buff_j *= fast_pow(v, j) * fast_pow((1.0-v), (BEZIER_M-j));
+            
+
+            buff = buff_i * buff_j;
+
+            Matrix<double> v_old(3, 1);
+            v_old.set(bezier[i][j]->x(), 0, 0);
+            v_old.set(bezier[i][j]->y(), 1, 0);
+            v_old.set(bezier[i][j]->z(), 2, 0);
+
+            Matrix<double> v_new(   Rx.multiply(Ry.multiply(v_old))   );
+
+            sum_j_x += buff*(v_new.get(0, 0));
+            sum_j_y += buff*(v_new.get(1, 0));
+            sum_j_z += buff*(v_new.get(2, 0));
+        }
+        sum_i_x += sum_j_x;
+        sum_i_y += sum_j_y;
+        sum_i_z += sum_j_z;
+    }
+    
+    return sPoint(sum_i_x, sum_i_y, sum_i_z);
+}
+
+void DrawField::refresh_RotaredMatrix()
+{
+    // https://i.imgur.com/kvfeDCv.png
+
+    Rx.set(1, 0, 0); Rx.set(0, 0, 1);           Rx.set(0, 0, 2); 
+    Rx.set(0, 1, 0); Rx.set(cos(deg2rad(angleX)), 1, 1); Rx.set(-sin(deg2rad(angleX)), 1, 2); 
+    Rx.set(0, 2, 0); Rx.set(sin(deg2rad(angleX)), 2, 1); Rx.set(cos(deg2rad(angleX)), 2, 2); 
+
+    Ry.set(cos(deg2rad(angleY)), 0, 0);  Ry.set(0, 0, 1); Ry.set(sin(deg2rad(angleY)), 0, 2); 
+    Ry.set(0, 1, 0);                     Ry.set(1, 1, 1); Ry.set(0, 1, 2); 
+    Ry.set(-sin(deg2rad(angleY)), 2, 0); Ry.set(0, 2, 1); Ry.set(cos(deg2rad(angleY)), 2, 2); 
 }
