@@ -1,6 +1,8 @@
 #include <QWidget>
 #include <QPainter>
+
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -14,9 +16,15 @@ using namespace std;
 
 DrawField::DrawField(QWidget *parent) : QWidget(parent), parent_mainWindow((MainWindow*)parent)
 {
+    HINT4FIRSTTIME = true;
+
     cur_stage = 0;
+    bypass = 0;
+    p1_main = sPoint(-1, -1); p2_main = sPoint(-1, -1);
 
     frame = new list<sPoint*>();
+
+    frame_final = NULL;
 
     resize(W, H);
     this->setStyleSheet("background-color: rgb(200,200,200); margin:0px; border:1px solid rgb(0, 0, 0); ");
@@ -27,10 +35,27 @@ DrawField::~DrawField()
     for(sPoint* el : *frame)
         delete el;
     delete frame;
+
+    if(frame_final != NULL)
+    {
+        for(size_t i = 0; i < frame_final_n; ++i)
+            delete frame_final[i];
+        delete frame_final;
+    }
 }
  
 void DrawField::paintEvent(QPaintEvent *e)
 {
+    if(HINT4FIRSTTIME)
+    {
+        string HINT = "\n\n\nFirst draw the \"screen\". \nTo finish drawing, move the mouse back to where you started and click LMB. \n";
+        HINT += "Using the RMB, you can move the points of the \"screen\". \n\n";
+        HINT += "After that, you can press LMB to place the first point of the segment, and RMB to place the second point. \nYou can place it as many times as you need. \n\n\n";
+        parent_mainWindow->ifFailed(HINT.c_str());
+
+        HINT4FIRSTTIME = false;
+    }
+
     Q_UNUSED(e);
 
     QPainter qp(this);
@@ -38,15 +63,15 @@ void DrawField::paintEvent(QPaintEvent *e)
     printFrame(qp);
 
     if(cur_stage == 0 && !frame->empty())
-        printPoint(*(frame->front()), qp, sup_getColor(255, 0, 0));
-    //unsigned char a, r, g, b;
-    //sup_getColor(sup_getColor(255, 0, 0), &r, &g, &b, &a);
-    //cout << "r=" << (unsigned)r << ", g=" << (unsigned)g << ", b=" << (unsigned)b << ", a=" << (unsigned)a << endl;
-    //QColor bu(255, 0, 0);
-    //cout << "r=" << (unsigned)bu.red() << ", g=" << (unsigned)bu.green() << ", b=" << (unsigned)bu.blue() << ", a=" << (unsigned)bu.alpha() << endl;
+        printPoint(*(frame->front()), qp, sup_getColor(255, 120, 120));
+    
+    if(cur_stage == 1 || cur_stage == 2)
+    {
+        cout << printFrameEdges() << endl;
+        printSegment(p1_main, p2_main, qp);
+    }
 }
 
-//void DrawField::mouseReleaseEvent(QMouseEvent* m_event)
 void DrawField::mousePressEvent(QMouseEvent* m_event)
 {
     /*Q_UNUSED(m_event);
@@ -96,7 +121,40 @@ void DrawField::mousePressEvent(QMouseEvent* m_event)
                         // clear vse?
                     }
                     else
+                    {
+                        frame_final_n = frame->size();
+                        frame_final = new sPoint*[frame_final_n];
+
+                        int frame_final_i = 0;
+                        bool FIRST_SKIP = false;
+                        sPoint *prev = frame->front();
+                        for(sPoint *el : *frame)
+                        {
+                            if(FIRST_SKIP == false)
+                            {
+                                FIRST_SKIP = true;
+                            }
+                            else
+                            {
+                                frame_final[frame_final_i] = new sPoint[2];
+                                frame_final[frame_final_i][0] = *prev;
+                                frame_final[frame_final_i][1] = *el;
+                                ++frame_final_i;
+
+                                prev = el;
+                            }
+                        }
+                        frame_final[frame_final_i] = new sPoint[2];
+                        frame_final[frame_final_i][0] = *prev;
+                        frame_final[frame_final_i][1] = *(frame->front());
+                        ++frame_final_i;
+
+                        //=======================
                         cur_stage = 1;
+                        bypass = isFrameConvex();
+                        bypass = bypass < 1?  bypass/(-bypass+(0-bypass))  :bypass; // blomp has been planted =/
+                        //=======================
+                    }
                 }
                 else
                 {
@@ -133,6 +191,34 @@ void DrawField::mousePressEvent(QMouseEvent* m_event)
             p_min->setY(y);
         }
     }
+    else if(cur_stage == 1 || cur_stage == 2)
+    {
+        int x = rightRound(m_event->position().x());
+        int y = rightRound(m_event->position().y());
+
+        if(m_event->buttons() == Qt::LeftButton)
+        {
+            p1_main = sPoint(x, y);
+            cur_stage = 1;
+        }
+        if(m_event->buttons() == Qt::RightButton)
+        {
+            p2_main = sPoint(x, y);
+            cur_stage = 2;
+        }
+
+        /*if(cur_stage == 1)
+        {
+            p1_main = sPoint(x, y);
+            cur_stage = 2;
+        }
+        else if(cur_stage == 2)
+        {
+            p2_main = sPoint(x, y);
+            cur_stage = 1;
+        }*/
+
+    }
 
     update();
 }
@@ -147,11 +233,11 @@ int DrawField::isFrameConvex()
     // Если же векторные произведения имеют разные знаки, то многоугольник отсечения невыпуклый
 
     // Если все знаки неотрицательные, то многоугольник выпуклый, причем обход вершин выполняется против часовой стрелки, 
-    // т.е. внутренние нормали ориентированы влево от контура. Следовательно вектор внутреннего перпендикуляра к стороне может быть получен поворотом ребра на +90° 
+    // т.е. внутренние нормали ориентированы влево от контура. Следовательно вектор **внутреннего** перпендикуляра к стороне может быть получен поворотом ребра на +90° 
     // (в реализации алгоритма вычисления нормалей на самом деле вычисляется не нормаль к стороне, а перпендикуляр, так как при вычислении значения t длина не важна).
 
     // Если все знаки неположительные, то многоугольник выпуклый, причем обход вершин выполняется по часовой стрелке, 
-    // т.е. внутренние нормали ориентированы вправо от контура. Следовательно вектор внутреннего перпендикуляра к стороне может быть получен поворотом ребра на -90°. 
+    // т.е. внутренние нормали ориентированы вправо от контура. Следовательно вектор **внутреннего** перпендикуляра к стороне может быть получен поворотом ребра на -90°. 
     
     std::cout << printFrameDots() << endl;
 
@@ -235,6 +321,23 @@ int DrawField::isFrameConvex()
         return -1;
 }
 
+sPoint DrawField::get_n_i(const sPoint &p1_begin, const sPoint &p2_end, int cur_bypass)
+{
+    sPoint v = makeVector(p1_begin, p2_end);
+    if(cur_bypass == 1)
+    {
+        sPoint rv = rotateVector(v, 90);
+        return rv;
+    }
+    else if (cur_bypass == 2)
+    {
+        sPoint rv = rotateVector(v, -90);
+        return rv;
+    }
+    else
+        return sPoint(-1, -1);
+}
+
 void DrawField::printLine(const sPoint& p0, const sPoint& p1, QPainter& pen)
 {
     int x1 = p0.x();
@@ -300,7 +403,7 @@ sPoint DrawField::makeVector(const sPoint& p1_begin, const sPoint& p2_end)
 
 string DrawField::printFrameDots()
 {
-    string res;
+    string res = "";
 
     res += "[ ";
     for(sPoint *el : *frame)
@@ -308,6 +411,19 @@ string DrawField::printFrameDots()
         res += "(" + to_string(el->x()) + ", " + to_string(el->y()) + ") ";
     }
     res += "]";
+
+    return res;
+}
+
+string DrawField::printFrameEdges()
+{
+    string res = "";
+
+    for(size_t i = 0; i < frame_final_n; ++i)
+    {
+        res += "(" + to_string(frame_final[i][0].x()) + ", " + to_string(frame_final[i][0].y()) + ")-";
+        res += "(" + to_string(frame_final[i][1].x()) + ", " + to_string(frame_final[i][1].y()) + ")\n";
+    }
 
     return res;
 }
@@ -334,7 +450,7 @@ int DrawField::rotationDirection(const sPoint& i, const sPoint& j, const sPoint&
     return res;
 }
 
-sPoint rotateVector(const sPoint &v, double angle_degrees)
+sPoint DrawField::rotateVector(const sPoint &v, double angle_degrees)
 {
     /*
     (x  y) *  ( cos(a)  sin(a)) = (x_new  y_new)
@@ -381,4 +497,110 @@ void DrawField::printPoint(const sPoint& p, QPainter& qp, unsigned colorino/* = 
     }
 
     qp.setPen(prevPen);
+}
+
+void DrawField::printSegment(const sPoint &p1, const sPoint &p2, QPainter& pen)
+{
+    if(p1.x() == -1 && p1.y() == -1)
+        return;
+    if(p2.x() == -1 && p2.y() == -1)
+        return;
+
+    printLine(p1, p2, pen);
+    
+    // https://i.imgur.com/us8LsoE.png
+
+    //double t_begin = -getINFINITY();
+    //double t_end = getINFINITY();
+    double t_begin = 0;
+    double t_end = 1;
+
+    for(size_t i = 0; i < frame_final_n; ++i)
+    {
+        double ti = 0;
+        //sPoint Pi = frame_final[i][0];
+        sPoint Pi = P_t(0.5, frame_final[i][0], frame_final[i][1]);
+        sPoint n_i = get_n_i(frame_final[i][0], frame_final[i][1], bypass); // внутренняя нормаль
+
+        
+        /* Раскоментировать, если нужно, чтобы отображались нормали:
+        double norm = sqrt(n_i.x()*n_i.x() + n_i.y()*n_i.y())*0.1;
+        sPoint n_i_buff;
+        n_i_buff.setX(rightRound((double)n_i.x()/norm));
+        n_i_buff.setY(rightRound((double)n_i.y()/norm));
+
+        printLine(Pi, sPoint(Pi.x()+n_i_buff.x(), Pi.y()+n_i_buff.y()), pen);
+        */
+
+        int Wi = scalarProduct(  makeVector(Pi, p1), n_i  );
+        int Qi = scalarProduct(  makeVector(p1, p2), n_i  );
+
+        if(Qi == 0)
+        {
+            if(Wi < 0)
+            {
+                return; // вне окна
+            }
+            else
+            {
+
+            }
+        }
+        else
+        {
+            ti = - ((double)Wi/(double)Qi);
+            if(Qi > 0)
+            {
+                //t_begin = max(t_begin, ti);
+                t_begin = t_begin>ti?t_begin:ti;
+            }
+            else
+            {
+                //t_end = min(t_end, ti);
+                t_end = t_end<ti?t_end:ti;
+            }
+        }
+    }
+
+    if(t_end >= t_begin)
+    {
+        // вывод отрезка
+
+        QPen prevPen = pen.pen();
+
+        unsigned colorino = sup_getColor(255, 30, 30);
+        QColor colo(colorino);
+        QPen curPen = QPen(colo);
+        pen.setPen(curPen);
+
+
+        // ==========================================
+        for(double t = t_begin; t <= t_end; t+=0.001)
+        {
+            sPoint Pt = P_t(t, p1, p2);
+            pen.drawPoint(Pt.x(), Pt.y());
+        }
+        // ==========================================
+
+
+        pen.setPen(prevPen);
+    }
+    else
+    {
+        return; // вне окна
+    }
+}
+
+sPoint DrawField::P_t(double t, const sPoint& p1, const sPoint& p2)
+{
+    if(t < 0 || t > 1)
+        return sPoint(-1, -1);
+
+    double x, y;
+
+    x = p1.x() + (p2.x() - p1.x())*t;
+    y = p1.y() + (p2.y() - p1.y())*t;
+
+    sPoint res(rightRound(x), rightRound(y));
+    return res;
 }

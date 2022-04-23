@@ -1,6 +1,4 @@
 
-//#include <QColor>
-
 #include <cmath>
 #include <random>
 #include <cstdlib>
