@@ -41,6 +41,7 @@ class DrawField : public QWidget
   private:
     void paintEvent(QPaintEvent *event);
     void printLine(const sPoint& p0, const sPoint& p1, QPainter& pen);
+    void printPoint(const sPoint& p, QPainter& qp, unsigned colorino = 0);
     void printFrame(QPainter& pen);
 
     static int scalarProduct(const sPoint& v1, const sPoint& v2);

@@ -5,11 +5,15 @@ int rightRound(double num);
 
 double deg2rad(double a);
 
+double rad2deg(double a);
+
 // x^n
 double fast_pow(double x, unsigned n);
 
 // return = #AARRGGBB
 unsigned sup_getColor(unsigned char r, unsigned char g, unsigned char b, unsigned char alpha = 255);
+
+unsigned sup_getColor(unsigned argb, unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *alpha);
 
 double ReLU(double x);
 
@@ -51,5 +55,7 @@ void sup_reset_array(double* a, size_t n, double x);
 bool sup_equals(double a, double b, double epsilon = 0.0001);
 
 bool sup_equals(int a, int b, int epsilon);
+
+double getINFINITY();
 
 #endif // SUP_H

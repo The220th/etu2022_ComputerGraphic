@@ -36,6 +36,14 @@ void DrawField::paintEvent(QPaintEvent *e)
     QPainter qp(this);
 
     printFrame(qp);
+
+    if(cur_stage == 0 && !frame->empty())
+        printPoint(*(frame->front()), qp, sup_getColor(255, 0, 0));
+    //unsigned char a, r, g, b;
+    //sup_getColor(sup_getColor(255, 0, 0), &r, &g, &b, &a);
+    //cout << "r=" << (unsigned)r << ", g=" << (unsigned)g << ", b=" << (unsigned)b << ", a=" << (unsigned)a << endl;
+    //QColor bu(255, 0, 0);
+    //cout << "r=" << (unsigned)bu.red() << ", g=" << (unsigned)bu.green() << ", b=" << (unsigned)bu.blue() << ", a=" << (unsigned)bu.alpha() << endl;
 }
 
 //void DrawField::mouseReleaseEvent(QMouseEvent* m_event)
@@ -61,32 +69,9 @@ void DrawField::mousePressEvent(QMouseEvent* m_event)
     //int x = m_event->x();
     //int y = m_event->y();
 
-    //if(m_event->buttons() == Qt::LeftButton)
-    // if(m_event->buttons() == Qt::RightButton)
-    // {
-    //     if(!frame->empty())
-    //     {
-    //         int x = rightRound(m_event->position().x());
-    //         int y = rightRound(m_event->position().y());
-
-    //         double S_min = std::numeric_limits<double>::infinity();
-    //         sPoint* p_min = NULL;
-    //         for(sPoint* near_p : *all_p)
-    //         {
-    //             double d_cur = (near_p->getX() - x)*(near_p->getX() - x) + (near_p->getY() - y)*(near_p->getY() - y);
-    //             if(d_cur < S_min)
-    //             {
-    //                 S_min = d_cur;
-    //                 p_min = near_p;
-    //             }
-    //         }
-    //         p_min->setX(x);
-    //         p_min->setY(y);
-    //     }
-    // }
-    // else // left button
-    // {
-        if(cur_stage == 0)
+    if(cur_stage == 0)
+    {
+        if(m_event->buttons() == Qt::LeftButton)
         {
             int x = rightRound(m_event->position().x());
             int y = rightRound(m_event->position().y());
@@ -125,10 +110,30 @@ void DrawField::mousePressEvent(QMouseEvent* m_event)
                     }
                 }
             }
-        }
+        }//
+        //
+        if(m_event->buttons() == Qt::RightButton)
+        {
+            int x = rightRound(m_event->position().x());
+            int y = rightRound(m_event->position().y());
 
-        //cout << "Clicked " << x << " " << y << endl;
-    // }
+            double S_min = getINFINITY();
+            sPoint* p_min = NULL;
+
+            for(sPoint* near_p : *frame)
+            {
+                double d_cur = (near_p->getX() - x)*(near_p->getX() - x) + (near_p->getY() - y)*(near_p->getY() - y);
+                if(d_cur < S_min)
+                {
+                    S_min = d_cur;
+                    p_min = near_p;
+                }
+            }
+            p_min->setX(x);
+            p_min->setY(y);
+        }
+    }
+
     update();
 }
 
@@ -163,23 +168,23 @@ int DrawField::isFrameConvex()
         int buff;
         sPoint *prev = 0;
         sPoint *cur = 0;
+        sPoint *first = 0, *second = 0;
         for(sPoint* next : *frame)
         {
             if(firstTime == 2)
             {
+                first = next;
                 prev = next;
                 --firstTime;
             }
             else if (firstTime == 1)
             {
+                second = next;
                 cur = next;
                 --firstTime;
             }
             else
             {
-                //v1 = makeVector(*prev, *cur);
-                //v2 = makeVector(*cur, *next);
-                //buff = scalarProduct(v1, v2);
                 buff = rotationDirection(*prev, *cur, *next);
                 std::cout << buff << endl;
                 if(buff != 0)
@@ -188,14 +193,23 @@ int DrawField::isFrameConvex()
                     ALLNEGATIVE = false;
                 if(buff < 0)
                     ALLPOSITIVE = false;
-                prev = cur;
-                cur = next;
+                prev = cur;    cur = next;
             }
         }
-        sPoint* next = frame->front();
-        //v1 = makeVector(*prev, *cur);
-        //v2 = makeVector(*cur, *next);
-        //buff = scalarProduct(v1, v2);
+
+        // Последний угол
+        sPoint* next = first;
+        buff = rotationDirection(*prev, *cur, *next);
+        std::cout << buff << endl;
+        if(buff != 0)
+            ALLZERO = false;
+        if(buff > 0)
+            ALLNEGATIVE = false;
+        if(buff < 0)
+            ALLPOSITIVE = false;
+
+        // Самый первый угол
+        prev = cur;    cur = next;    next = second;
         buff = rotationDirection(*prev, *cur, *next);
         std::cout << buff << endl;
         if(buff != 0)
@@ -333,4 +347,38 @@ sPoint rotateVector(const sPoint &v, double angle_degrees)
 
     sPoint res(x_new, y_new);
     return res;
+}
+
+void DrawField::printPoint(const sPoint& p, QPainter& qp, unsigned colorino/* = 0*/)
+{
+    QPen prevPen = qp.pen();
+    QColor colo(colorino);
+    QPen curPen = QPen(colo);
+    qp.setPen(curPen);
+
+    int x0 = p.x();
+    int y0 = p.y();
+    int r = pixel_epsilon;
+    /*
+    (x - x0)^2 + (y - y0)^2 = r^2
+    y = +sqrt(r^2 - (x-x0)^2) + y0
+    y = -sqrt(r^2 - (x-x0)^2) + y0
+    */
+    qp.drawPoint(x0, y0);
+    for (int x = x0-r; x <= x0+r; ++x)
+    {
+        double sq = sqrt((double)(r*r - (x-x0)*(x-x0)));
+        double buff = sq + y0;
+        buff = buff < 0 ? buff-0.5: buff+0.5;
+        int y1 = (int)(buff);
+
+        buff = -sq + y0;
+        buff = buff < 0 ? buff-0.5: buff+0.5;
+        int y2 = (int)(buff);
+
+        qp.drawPoint(x, y1);
+        qp.drawPoint(x, y2);
+    }
+
+    qp.setPen(prevPen);
 }

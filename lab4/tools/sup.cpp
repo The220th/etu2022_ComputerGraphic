@@ -1,5 +1,5 @@
 
-#include <QColor>
+//#include <QColor>
 
 #include <cmath>
 #include <random>
@@ -25,6 +25,15 @@ double deg2rad(double a)
    return (M_PI*a) / 180.0;
 }
 
+double rad2deg(double a)
+{
+    /*
+    180 - pi
+    x   - a
+    */
+   return (180.0*a) / M_PI;
+}
+
 double fast_pow(double x, unsigned n)
 {
     double res = 1.0;
@@ -44,8 +53,46 @@ double fast_pow(double x, unsigned n)
 
 unsigned sup_getColor(unsigned char r, unsigned char g, unsigned char b, unsigned char alpha)
 {
-    QColor buff(r, g, b, alpha);
-    return buff.rgb(); // #AARRGGBB
+    // # BBRRGGAA
+
+
+    //QColor buff(r, g, b, alpha);
+    //return buff.rgb(); // #AARRGGBB слева младшие биты
+
+    unsigned res = 0, buff = 0;
+
+    buff = alpha;
+    res |= buff << 0;
+
+    buff = g;
+    res |= buff << 8;
+
+    buff = r;
+    res |= buff << 16;
+
+    buff = b;
+    res |= buff << 24;
+
+    return res;
+}
+
+unsigned sup_getColor(unsigned argb, unsigned char *r, unsigned char *g, unsigned char *b, unsigned char *alpha)
+{
+    unsigned buff;
+
+    buff = argb >> 0;
+    *alpha = (unsigned char)buff;
+
+    buff = argb >> 8;
+    *g = (unsigned char)buff;
+
+    buff = argb >> 16;
+    *r = (unsigned char)buff;
+
+    buff = argb >> 24;
+    *b = (unsigned char)buff;
+
+    return argb;
 }
 
 double ReLU(double x)
@@ -169,4 +216,10 @@ bool sup_equals(int a, int b, int epsilon)
     int d = a - b;
     d = d<0?-d:d;
     return d < epsilon?true:false;
+}
+
+double getINFINITY()
+{
+    double res = std::numeric_limits<double>::infinity();;
+    return res;
 }
