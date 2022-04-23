@@ -12,7 +12,7 @@
 > make
 ```
 
-В лабораторных работах: 1, 2, 3 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
+В лабораторных работах: 1, 2, 3, 4 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
 
 ## lab1
 
@@ -34,6 +34,10 @@
 ## lab2
 
 Кривая Безье n-го порядка
+
+``` bash
+> ./lab2
+```
 
 ## lab3
 
