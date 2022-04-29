@@ -327,11 +327,11 @@ void DrawField::putPointOnScreen(int x, int y, unsigned **display, unsigned colo
     //sPoint O(cam.o());
     double _x = ((double)x*r*2.0)/((double)W-1) - r;
     double _y = ((double)y*t*2.0)/((double)H-1) - t;
-    sPoint P(_x, _y, n);
+    sPoint P(_x, n, _y);
     //sPoint P(x, y, n);
  
     sPoint crossP = tri.crossLine(O, P);
-    double z_crossed = crossP.z();
+    double z_crossed = crossP.y();
 
     if(z_crossed < z_buffer[x][y])
     {
