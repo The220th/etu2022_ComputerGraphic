@@ -54,6 +54,9 @@ class DrawField : public QWidget
     ~DrawField();
 
     void keyPressEventFU(QKeyEvent *event);
+
+    sPoint translatePoint_3D_to_camera(double x, double y, double z);
+    sPoint translatePoint_3D_to_camera(const sPoint &p);
     
     /*z of return point is always zero*/
     sPoint translatePoint_3D_to_2D(double x, double y, double z);

@@ -58,4 +58,8 @@ bool sup_equals(int a, int b, int epsilon);
 
 double getINFINITY();
 
+int sup_gcd(int a, int b);
+
+int sup_gcd(int *a, size_t a_n);
+
 #endif // SUP_H

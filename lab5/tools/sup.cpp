@@ -221,3 +221,33 @@ double getINFINITY()
     double res = std::numeric_limits<double>::infinity();;
     return res;
 }
+
+int sup_gcd(int a, int b)
+{
+    if(a == 0 || b == 0)
+        return 0;
+    /*if(a == 0 && b == 0)
+        return 0;
+	else if(a == 0 || b == 0)
+		return a > b?a:b;*/
+    while( b^=a^=b^=a%=b );
+    return a;
+}
+
+int sup_gcd(int *a, size_t a_n)
+{
+    int res = 1;
+    bool ALL_ZERO = true;
+    for(size_t i = 0; i < a_n; ++i)
+    {
+        if(a[i] != 0)
+        {
+            res = sup_gcd(res, a[i]);
+            ALL_ZERO = false;
+        }
+    }
+    if(ALL_ZERO)
+        return 0;
+    else
+        return res;
+}

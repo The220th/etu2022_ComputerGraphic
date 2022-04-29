@@ -1,8 +1,11 @@
 #include <QWidget>
 #include <QPainter>
 
+#include <iostream>
+
 #include "../include/sPoint.h"
 #include "../include/sTriangle.h"
+#include "../include/sup.h"
 
 
 
@@ -13,6 +16,7 @@ sTriangle::sTriangle(const sPoint &p1, const sPoint &p2, const sPoint &p3)
 : P1(p1), P2(p2), P3(p3)
 {
     ABCD(P1, P2, P3, &A, &B, &C, &D);
+    //std::cout << A << " " << B << " " << C << " " << D << std::endl;
 }
 
 sTriangle::sTriangle(const sTriangle& toCopied)
@@ -50,8 +54,8 @@ void sTriangle::setP(const sPoint &new_p1, const sPoint &new_p2, const sPoint &n
 sPoint sTriangle::crossLine(const sPoint &p_lineBegin, const sPoint &p_lineEnd) const
 {
     const sPoint p = sPoint(p_lineEnd.x() - p_lineBegin.x(),
-    p_lineEnd.y() - p_lineBegin.y(),
-    p_lineEnd.z() - p_lineBegin.z());
+                            p_lineEnd.y() - p_lineBegin.y(),
+                            p_lineEnd.z() - p_lineBegin.z());
 
     const sPoint M = sPoint(p_lineBegin.x(), p_lineBegin.y(), p_lineBegin.z());
 
@@ -91,5 +95,16 @@ void sTriangle::ABCD(const sPoint &p0, const sPoint &p1, const sPoint &p2, doubl
     *B = A10;
     *C = A20;
 
-    *D = A00*p0.x() + A10*p0.y() + A20*p0.z();
+    *D = -(     A00*p0.x() + A10*p0.y() + A20*p0.z()     );
+
+    /*int _a_[4] = {*A, *B, *C, *D};
+    int _gcd = sup_gcd(_a_, 4);
+
+    if(_gcd != 0)
+    {
+        *A /= _gcd;
+        *B /= _gcd;
+        *C /= _gcd;
+        *D /= _gcd;
+    }*/
 }

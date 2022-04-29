@@ -165,6 +165,32 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     update();
 }
 
+sPoint DrawField::translatePoint_3D_to_camera(const sPoint &p)
+{
+    return translatePoint_3D_to_camera(p.x(), p.y(), p.z());
+}
+
+sPoint DrawField::translatePoint_3D_to_camera(double x, double y, double z)
+{
+    sPoint cam_o = cam.o();
+    double obj_x = x - cam_o.x(); 
+    double obj_y = y - cam_o.y(); 
+    double obj_z = z - cam_o.z(); 
+
+    //std::cout << C_.multiply(C).toString() << std::endl;
+
+    Matrix<double> old_v(3, 1);
+    old_v.set(obj_x, 0, 0); old_v.set(obj_y, 1, 0); old_v.set(obj_z, 2, 0);
+
+    Matrix<double> new_v = C_->multiply(old_v);
+
+    double x_ = new_v.get(0, 0);
+    double y_ = new_v.get(1, 0);
+    double z_ = new_v.get(2, 0);
+
+    return sPoint(x_, y_, z_);
+}
+
 sPoint DrawField::translatePoint_3D_to_2D(const sPoint &p)
 {
     return translatePoint_3D_to_2D(p.x(), p.y(), p.z());
@@ -291,14 +317,18 @@ void DrawField::putPointOnScreen(int x, int y, unsigned **display, unsigned colo
 {
     /*
     1) Найти пересечение прямой OP с tri
-    O - начало координат камеры
-    P - точка на перспективной плоскости
+        O - начало координат камеры
+        P - точка на перспективной плоскости
     2) Сравнить z пересечения с z в z_buffer`е
     3) Расположить точку на screen
     */
 
     sPoint O(0.0, 0.0, 0.0);
-    sPoint P(x, y, n);
+    //sPoint O(cam.o());
+    double _x = ((double)x*r*2.0)/((double)W-1) - r;
+    double _y = ((double)y*t*2.0)/((double)H-1) - t;
+    sPoint P(_x, _y, n);
+    //sPoint P(x, y, n);
  
     sPoint crossP = tri.crossLine(O, P);
     double z_crossed = crossP.z();
@@ -364,6 +394,12 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
     sPoint B = translatePoint_3D_to_2D(tri.p2());
     sPoint C = translatePoint_3D_to_2D(tri.p3());
 
+    //cout << tri.p1().print("DO") << " " << translatePoint_3D_to_camera(tri.p1()).print("nOCJlE") << endl;
+
+    const sTriangle tri_camera(translatePoint_3D_to_camera(tri.p1()), 
+                               translatePoint_3D_to_camera(tri.p2()), 
+                               translatePoint_3D_to_camera(tri.p3()) );
+
     int x0 = rightRound(A.x()), y0 = rightRound(A.y());
     int x1 = rightRound(B.x()), y1 = rightRound(B.y());
     int x2 = rightRound(C.x()), y2 = rightRound(C.y());
@@ -410,7 +446,7 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
     {
         cross_x1 = x0 + dx1 * (top_y - y0) / dy1;
         cross_x2 = x0 + dx2 * (top_y - y0) / dy2;
-        printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri);
+        printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri_camera);
         ++top_y;
         //cout << 5051 << endl;
     }
@@ -422,16 +458,16 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
     {
         cross_x1 = x1 + dx1 * (top_y - y1) / dy1;
         cross_x2 = x0 + dx2 * (top_y - y0) / dy2;
-        printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri);
+        printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri_camera);
         ++top_y;
         //cout << 5052 << endl;
     }
 
     if(OUTLINE == true)
     {
-        printLineFU(x0, y0, x1, y1, outlineColo, display, z_buffer, tri);
-        printLineFU(x1, y1, x2, y2, outlineColo, display, z_buffer, tri);
-        printLineFU(x2, y2, x0, y0, outlineColo, display, z_buffer, tri);
+        printLineFU(x0, y0, x1, y1, outlineColo, display, z_buffer, tri_camera);
+        printLineFU(x1, y1, x2, y2, outlineColo, display, z_buffer, tri_camera);
+        printLineFU(x2, y2, x0, y0, outlineColo, display, z_buffer, tri_camera);
     }
 }
 
