@@ -51,15 +51,17 @@ double fast_pow(double x, unsigned n)
 
 unsigned sup_getColor(unsigned char r, unsigned char g, unsigned char b, unsigned char alpha)
 {
-    // # BBRRGGAA
+    //          | старшие биты
+    //          v
+    // # BBGGRRAA
+    //   ^
+    //   | младшие биты
 
-
-    //QColor buff(r, g, b, alpha);
-    //return buff.rgb(); // #AARRGGBB слева младшие биты
 
     unsigned res = 0, buff = 0;
 
-    buff = alpha;
+    //buff = alpha;
+    buff = b;
     res |= buff << 0;
 
     buff = g;
@@ -68,9 +70,11 @@ unsigned sup_getColor(unsigned char r, unsigned char g, unsigned char b, unsigne
     buff = r;
     res |= buff << 16;
 
-    buff = b;
+    //buff = b;
+    buff = alpha;
     res |= buff << 24;
 
+    // QColor buff(r, g, b, alpha);    return buff.rgb();
     return res;
 }
 
@@ -79,7 +83,8 @@ unsigned sup_getColor(unsigned argb, unsigned char *r, unsigned char *g, unsigne
     unsigned buff;
 
     buff = argb >> 0;
-    *alpha = (unsigned char)buff;
+    //*alpha = (unsigned char)buff;
+    *b = (unsigned char)buff;
 
     buff = argb >> 8;
     *g = (unsigned char)buff;
@@ -88,7 +93,8 @@ unsigned sup_getColor(unsigned argb, unsigned char *r, unsigned char *g, unsigne
     *r = (unsigned char)buff;
 
     buff = argb >> 24;
-    *b = (unsigned char)buff;
+    //*b = (unsigned char)buff;
+    *alpha = (unsigned char)buff;
 
     return argb;
 }

@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
     MainWindow window;
 
     window.setWindowTitle("lab5");
-    window.resize(1280, 720);
+    //window.resize(1280, 720);
+    window.resize(600, 400);
     window.setWindowIcon(QIcon("./imgsrc/ico.png"));
 
     window.show();

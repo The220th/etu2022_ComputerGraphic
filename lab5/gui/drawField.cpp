@@ -471,36 +471,43 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
     }
 }
 
-void DrawField::putLine3D(const sPoint &p0, const sPoint &p1, unsigned colo/* = 0*/)
+void DrawField::putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint &ld, const sPoint &rd, unsigned colo, unsigned outlineColo, bool OUTLINE)
 {
-    /*
-    int x1 = p0.x();
-    int x2 = p1.x();
-    int y1 = p0.y();
-    int y2 = p1.y();
+    // lu------ru        lu      ru
+    // |     /                 / |
+    // |  /                 /    |
+    // ld      rd        ld------rd
+    //    one1              two2
+    sTriangle one1(lu, ru, ld);
+    sTriangle two2(ld, rd, ru);
 
-    int deltaX = abs(x2 - x1);
-    int deltaY = abs(y2 - y1);
-    int signX = x1 < x2 ? 1 : -1;
-    int signY = y1 < y2 ? 1 : -1;
-    //
-    int error = deltaX - deltaY;
-    //
-    pen.drawPoint(x2, y2);
-    while(x1 != x2 || y1 != y2) 
+    putTriangle3D(one1, colo, outlineColo, false);
+    putTriangle3D(two2, colo, outlineColo, false);
+
+    if(OUTLINE == true)
     {
-        pen.drawPoint(x1, y1);
-        int error2 = error * 2;
-        //
-        if(error2 > -deltaY) 
-        {
-            error -= deltaY;
-            x1 += signX;
-        }
-        if(error2 < deltaX) 
-        {
-            error += deltaX;
-            y1 += signY;
-        }
-    }*/
+        // A    B
+        // C    D
+        sPoint A = translatePoint_3D_to_2D(lu);
+        sPoint B = translatePoint_3D_to_2D(ru);
+        sPoint C = translatePoint_3D_to_2D(ld);
+        sPoint D = translatePoint_3D_to_2D(rd);
+
+        int x0 = rightRound(A.x()), y0 = rightRound(A.y());
+        int x1 = rightRound(B.x()), y1 = rightRound(B.y());
+        int x2 = rightRound(C.x()), y2 = rightRound(C.y());
+        int x3 = rightRound(D.x()), y3 = rightRound(D.y());
+
+        const sTriangle tri_camera1(translatePoint_3D_to_camera(A), 
+                               translatePoint_3D_to_camera(B), 
+                               translatePoint_3D_to_camera(C) );
+        const sTriangle tri_camera2(translatePoint_3D_to_camera(C), 
+                               translatePoint_3D_to_camera(D), 
+                               translatePoint_3D_to_camera(B) );
+
+        printLineFU(x0, y0, x1, y1, outlineColo, display, z_buffer, tri_camera1);
+        printLineFU(x0, y0, x2, y2, outlineColo, display, z_buffer, tri_camera1);
+        printLineFU(x2, y2, x3, y3, outlineColo, display, z_buffer, tri_camera2);
+        printLineFU(x3, y3, x2, y2, outlineColo, display, z_buffer, tri_camera2);
+    }
 }

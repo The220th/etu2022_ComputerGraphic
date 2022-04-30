@@ -19,14 +19,14 @@ class DrawField : public QWidget
   //Q_OBJECT
 
   private:
-    const size_t W = 1280/*600*/;
-    const size_t H = 720/*400*/;
+    const size_t W = /*1280*/600;
+    const size_t H = /*720*/400;
     const double aspect = (double)W / (double)H;
 
     const double n = 1;      // Расстояние до ближайщей (основной) перспективной плоскости
     const double f = 10000; // Расстояние до дальней                                           Получается фруструм
 
-    const double fov = 90;
+    const double fov = 65;
     const double t = /* n*tg*(fov/2)  */n * tan(fov/2); // top of основной перспективной плоскости
     const double r = t*aspect;                //right of основной перспективной плоскости
 
@@ -69,7 +69,8 @@ class DrawField : public QWidget
 
 
     void putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outlineColo = 0, bool OUTLINE = true);
-    void putLine3D(const sPoint &p0, const sPoint &p1, unsigned colo = 0);
+    void putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint &ld, const sPoint &rd, unsigned colo, unsigned outlineColo = 0, bool OUTLINE = true);
+    //void putLine3D(const sPoint &p0, const sPoint &p1, unsigned colo = 0);
  
   private:
     void paintEvent(QPaintEvent *event);
