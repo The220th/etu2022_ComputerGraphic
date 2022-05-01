@@ -69,7 +69,7 @@ class DrawField : public QWidget
 
 
     void putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outlineColo = 0, bool OUTLINE = true);
-    void putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint &ld, const sPoint &rd, unsigned colo, unsigned outlineColo = 0, bool OUTLINE = true);
+    void putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint &ld, const sPoint &rd, unsigned colo, unsigned outlineColo = 0, bool OUTLINE = false);
     //void putLine3D(const sPoint &p0, const sPoint &p1, unsigned colo = 0);
  
   private:

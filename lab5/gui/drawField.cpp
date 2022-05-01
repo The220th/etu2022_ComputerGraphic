@@ -390,15 +390,61 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
     2.1.1) Вычислять z каждой отрисованной точки
     3) Всё?
     */
-    sPoint A = translatePoint_3D_to_2D(tri.p1());
-    sPoint B = translatePoint_3D_to_2D(tri.p2());
-    sPoint C = translatePoint_3D_to_2D(tri.p3());
-
-    //cout << tri.p1().print("DO") << " " << translatePoint_3D_to_camera(tri.p1()).print("nOCJlE") << endl;
-
-    const sTriangle tri_camera(translatePoint_3D_to_camera(tri.p1()), 
+    /*const*/ sTriangle tri_camera(translatePoint_3D_to_camera(tri.p1()), 
                                translatePoint_3D_to_camera(tri.p2()), 
                                translatePoint_3D_to_camera(tri.p3()) );
+    if(tri_camera.p1().y() < n && tri_camera.p2().y() < n && tri_camera.p3().y() < n)
+        return;
+    sPoint A;
+    sPoint B;
+    sPoint C;
+    if(tri_camera.p1().y() < 0)
+    {
+        double x_ = -tri_camera.p1().x();
+        double z_ = -tri_camera.p1().z();
+        double y_ =  tri_camera.p1().y();
+        tri_camera = sTriangle(sPoint(x_, y_, z_), tri_camera.p2(), tri_camera.p3()); // Закоментить эту строку???
+        double xp = ((n*x_)/y_);
+        double zp = ((n*z_)/y_);
+        double x_res, y_res;
+        x_res = ((xp+r)*(W-1))/(r+r);
+        y_res = ((zp+t)*(H-1))/(t+t);
+        A = sPoint(x_res, y_res, 0.0);
+    }
+    else
+        A = translatePoint_3D_to_2D(tri.p1());
+
+    if(tri_camera.p2().y() < 0)
+    {
+        double x_ = -tri_camera.p2().x();
+        double z_ = -tri_camera.p2().z();
+        double y_ =  tri_camera.p2().y();
+        tri_camera = sTriangle(tri_camera.p1(), sPoint(x_, y_, z_), tri_camera.p3()); // Закоментить эту строку???
+        double xp = ((n*x_)/y_);
+        double zp = ((n*z_)/y_);
+        double x_res, y_res;
+        x_res = ((xp+r)*(W-1))/(r+r);
+        y_res = ((zp+t)*(H-1))/(t+t);
+        B = sPoint(x_res, y_res, 0.0);
+    }
+    else
+        B = translatePoint_3D_to_2D(tri.p2());
+
+    if(tri_camera.p3().y() < 0)
+    {
+        double x_ = -tri_camera.p3().x();
+        double z_ = -tri_camera.p3().z();
+        double y_ =  tri_camera.p3().y();
+        tri_camera = sTriangle(tri_camera.p1(), tri_camera.p2(), sPoint(x_, y_, z_)); // Закоментить эту строку???
+        double xp = ((n*x_)/y_);
+        double zp = ((n*z_)/y_);
+        double x_res, y_res;
+        x_res = ((xp+r)*(W-1))/(r+r);
+        y_res = ((zp+t)*(H-1))/(t+t);
+        C = sPoint(x_res, y_res, 0.0);
+    }
+    else
+        C = translatePoint_3D_to_2D(tri.p3());
 
     int x0 = rightRound(A.x()), y0 = rightRound(A.y());
     int x1 = rightRound(B.x()), y1 = rightRound(B.y());
@@ -448,7 +494,6 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
         cross_x2 = x0 + dx2 * (top_y - y0) / dy2;
         printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri_camera);
         ++top_y;
-        //cout << 5051 << endl;
     }
 
     dx1 = x2 - x1;
@@ -460,7 +505,6 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo, unsigned outl
         cross_x2 = x0 + dx2 * (top_y - y0) / dy2;
         printLineFU(cross_x1, top_y, cross_x2, top_y, colo, display, z_buffer, tri_camera);
         ++top_y;
-        //cout << 5052 << endl;
     }
 
     if(OUTLINE == true)
@@ -486,6 +530,7 @@ void DrawField::putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint 
 
     if(OUTLINE == true)
     {
+        // Надо также вначале проделать как в putTriangle3D, но так лень=/
         // A    B
         // C    D
         sPoint A = translatePoint_3D_to_2D(lu);
