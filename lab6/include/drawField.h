@@ -62,7 +62,7 @@ class DrawField : public QWidget
 
     sPoint lightPoint;
     double h_lightPoint;
-    const double h_ambientLighting = 10; // Окружающее освещение
+    const double h_ambientLighting = /*10*/ sup_getColor(10, 10, 10, 10); // Окружающее освещение
 
     std::list<PoligonUnit> polis;
     std::list<sTriangle> cam_polis;

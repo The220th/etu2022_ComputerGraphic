@@ -350,7 +350,11 @@ unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &light
                 //      P1  -  P0
                 double t = (crossP.x() - P.x()) / (lightP.x() - P.x());
                 if(0 <= t && t <= 1)
-                    return sup_getColor(10, 10, 10);
+                {
+                    unsigned resColo = sup_enhanceColor(colo, 0.1);
+                    resColo = sup_addColors(resColo, h_world);
+                    return resColo;
+                }
             }
         }
     }

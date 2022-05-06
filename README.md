@@ -12,7 +12,7 @@
 > make
 ```
 
-В лабораторных работах: 1, 2, 3, 4, 5 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
+В лабораторных работах: 1, 2, 3, 4, 5, 6 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
 
 ## lab1
 
@@ -75,4 +75,12 @@ z-buffer
 
 ``` bash
 > ./lab5
+```
+
+## lab6
+
+Тень
+
+``` bash
+> ./lab6
 ```
