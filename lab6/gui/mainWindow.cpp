@@ -5,6 +5,8 @@
 #include <QGridLayout>
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QDialog>
+#include <QLabel>
 
 #include "../include/mainWindow.h"
 #include "../include/drawField.h"
@@ -44,4 +46,15 @@ DrawField* MainWindow::getDrawField()
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     drawField->keyPressEventFU(event);
+}
+
+void MainWindow::ifNotNote(std::string msg)
+{
+    QDialog *error = new QDialog();
+    error->setModal(true);
+    QLabel *label = new QLabel(msg.c_str());
+    QGridLayout *gr = new QGridLayout();
+    gr->addWidget(label, 0, 0);
+    error->setLayout(gr);
+    error->show();
 }

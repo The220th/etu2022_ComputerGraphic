@@ -9,6 +9,7 @@
 #include <list>
 
 #include "../include/drawField.h"
+#include "../include/mainWindow.h"
 
 #include "../include/sPoint.h"
 #include "../include/sTriangle.h"
@@ -24,6 +25,7 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
     resize(W, H);
     this->setStyleSheet("background-color: rgb(200,200,200); margin:0px; border:1px solid rgb(0, 0, 0); ");
     
+    parent_MainWindow = (MainWindow*)parent;
     FIRSTTIME = true;
 
     C_ = NULL;
@@ -39,7 +41,7 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
         z_buffer[li] = new double[H];
     refresh_z_buffer();
 
-    lightPoint = sPoint(150, 150, 100);
+    lightPoint = sPoint(45, 40, 70);
     h_lightPoint = 2;
 
     polis = list<PoligonUnit>();
@@ -70,6 +72,19 @@ void DrawField::paintEvent(QPaintEvent *e)
     {
         FIRSTTIME = false;
         planner_plan(this);
+
+        string HINT = "\n\n\nThe >observer_ is now looking along the OY axis in the positive direction. To the right of him is OX, and on top - OZ. \n\n";
+        HINT += "To move, use the arrows. \nTo rotate in space, use the \"AWSDQE\" keys. \n\n\n";
+        HINT += "The light source looks like an isosceles yellow triangle. \n\n";
+        HINT += "To move the light source along the OX axis in the positive direction, use the \"K\" key. \n";
+        HINT += "To move the light source along the OX axis in the negative direction, use the \"H\" key. \n";
+        HINT += "To move the light source along the OY axis in the positive direction, use the \"U\" key. \n";
+        HINT += "To move the light source along the OY axis in the negative direction, use the \"J\" key. \n";
+        HINT += "To move the light source along the OZ axis in the positive direction, use the \"Y\" key. \n";
+        HINT += "To move the light source along the OZ axis in the negative direction, use the \"I\" key. \n\n\n";
+        HINT += "The house is floating in the air. \n";
+
+        parent_MainWindow->ifNotNote(HINT.c_str());
     }
 
     refresh_display();

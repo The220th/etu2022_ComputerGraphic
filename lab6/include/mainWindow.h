@@ -8,7 +8,11 @@
 #include <QGridLayout>
 #include <QMainWindow>
 
+#include <string>
+
 #include "../include/drawField.h"
+
+class DrawField;
 
 class MainWindow : public QWidget
 {
@@ -22,6 +26,8 @@ class MainWindow : public QWidget
     MainWindow(QWidget *parent = 0);
 
     DrawField* getDrawField();
+
+    void ifNotNote(std::string msg);
 
     protected:
     void keyPressEvent(QKeyEvent *event);

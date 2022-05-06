@@ -13,7 +13,9 @@
 #include "../include/sCamera.h"
 #include "../include/matrix.h"
 #include "../include/sup.h"
+#include "../include/mainWindow.h"
 
+class MainWindow;
 
 struct PoligonUnit
 {
@@ -39,6 +41,7 @@ class DrawField : public QWidget
     const double t = /* n*tg*(fov/2)  */n * tan(fov/2); // top of основной перспективной плоскости
     const double r = t*aspect;                //right of основной перспективной плоскости
 
+    MainWindow *parent_MainWindow;
     bool FIRSTTIME;
 
     Matrix<double> *C_;
