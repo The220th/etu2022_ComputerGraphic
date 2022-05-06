@@ -39,11 +39,13 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
         z_buffer[li] = new double[H];
     refresh_z_buffer();
 
-    lightPoint = sPoint(300, 300, 300);
+    lightPoint = sPoint(150, 150, 100);
     h_lightPoint = 2;
 
     polis = list<PoligonUnit>();
     cam_polis = list<sTriangle>();
+
+    cam.move(50.0, 0.0, 70.0);
 }
 
 DrawField::~DrawField()
@@ -75,6 +77,16 @@ void DrawField::paintEvent(QPaintEvent *e)
 
     for(PoligonUnit &el : polis)
         drawPoligon3D(el);
+    
+    //        Источник света
+    sTriangle lightTri(
+        sPoint(lightPoint.x()-5, lightPoint.y(), lightPoint.z()-2),
+        sPoint(lightPoint.x()+5, lightPoint.y(), lightPoint.z()-2),
+        sPoint(lightPoint.x(), lightPoint.y(), lightPoint.z()+2)
+    );
+    PoligonUnit lightPoli = {lightTri, sup_getColor(255, 255, 50)};
+    drawPoligon3D(lightPoli);
+    //        Источник света
 
     QPainter qp(this);
     for(size_t li = 0; li < H; ++li)
@@ -101,14 +113,14 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     {
         cam.moveBack(d);
     }
-    else if(key == Qt::Key_U)
+    /*else if(key == Qt::Key_U)
     {
         cam.move(d, 0.0, 0.0);
     }
     else if(key == Qt::Key_J)
     {
         cam.move(-d, 0.0, 0.0);
-    }
+    }*/
     else if(key == Qt::Key_Left)
     {
         cam.moveLeft(d);
@@ -117,14 +129,14 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     {
         cam.moveRight(d);
     }
-    else if(key == Qt::Key_H)
+    /*else if(key == Qt::Key_H)
     {
         cam.move(0.0, d, 0.0);
     }
     else if(key == Qt::Key_K)
     {
         cam.move(0.0, -d, 0.0);
-    }
+    }*/
     else if(key == Qt::Key_Space)
     {
         cam.move(0.0, 0.0, d);
@@ -133,14 +145,14 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     {
         cam.move(0.0, 0.0, -d);
     }
-    else if(key == Qt::Key_Y)
+    /*else if(key == Qt::Key_Y)
     {
         cam.moveUp(d);
     }
     else if(key == Qt::Key_I)
     {
         cam.moveDown(d);
-    }
+    }*/
     else if(key == Qt::Key_W)
     {
         cam.rotateOX(-dd);
@@ -165,8 +177,32 @@ void DrawField::keyPressEventFU(QKeyEvent *event)
     {
         cam.rotateOY(dd);
     }
+    // Источник света
+    else if(key == Qt::Key_H) // -x
+    {
+        lightPoint.add(sPoint(-d, 0.0, 0.0));
+    }
+    else if(key == Qt::Key_K) // +x
+    {
+        lightPoint.add(sPoint(d, 0.0, 0.0));
+    }
+    else if(key == Qt::Key_U) // +y
+    {
+        lightPoint.add(sPoint(0.0, d, 0.0));
+    }
+    else if(key == Qt::Key_J) // -y
+    {
+        lightPoint.add(sPoint(0.0, -d, 0.0));
+    }
+    else if(key == Qt::Key_Y) // +z
+    {
+        lightPoint.add(sPoint(0.0, 0.0, d));
+    }
+    else if(key == Qt::Key_I) // -z
+    {
+        lightPoint.add(sPoint(0.0, 0.0, -d));
+    }
 
-    //cout << cam.print() << endl;
 
     refresh_C_();
     update();
@@ -351,6 +387,8 @@ unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &light
                 double t = (crossP.x() - P.x()) / (lightP.x() - P.x());
                 if(0 <= t && t <= 1)
                 {
+                    (void)h_lightP; // =/
+
                     unsigned resColo = sup_enhanceColor(colo, 0.1);
                     resColo = sup_addColors(resColo, h_world);
                     return resColo;
@@ -391,6 +429,7 @@ void DrawField::putPointOnScreen(int x, int y, unsigned **display, unsigned colo
             size_t display_x = (size_t)x;
 
             sPoint cam_lightP = translatePoint_3D_to_camera(lightPoint);
+            /*Для оптимизации можно изменять цвет в функции paintEvent после того, как "display" уже сформируется, но так лень...=/*/
             unsigned shadowColo = shadowtf(crossP, colo, cam_lightP, h_lightPoint, h_ambientLighting, cam_polis, tri);
 
             display[H-1-display_y][display_x] = shadowColo;
