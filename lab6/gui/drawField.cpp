@@ -43,6 +43,7 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
     h_lightPoint = 2;
 
     polis = list<PoligonUnit>();
+    cam_polis = list<sTriangle>();
 }
 
 DrawField::~DrawField()
@@ -302,6 +303,18 @@ void DrawField::refresh_C_()
     if(C_ != NULL)
         delete C_;
     C_ = new Matrix<double>(C_buff);
+
+
+    // ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы
+    list<PoligonUnit>::iterator it1;
+    list<sTriangle>::iterator it2;
+    for(it1 = polis.begin(), it2 = cam_polis.end(); it1 != polis.end(); ++it1, ++it2)
+    {
+        sTriangle tri_camera(translatePoint_3D_to_camera(it1->tri.p1()), 
+                               translatePoint_3D_to_camera(it1->tri.p2()), 
+                               translatePoint_3D_to_camera(it1->tri.p3()) );
+        *it2 = tri_camera;
+    }
 }
 
 void DrawField::refresh_display()
@@ -319,19 +332,16 @@ void DrawField::refresh_z_buffer()
             z_buffer[li][lj] = max_double;
 }
 
-unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::list<PoligonUnit> &allPoli, const sTriangle &curTri)
+unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::list<sTriangle> &allPoli, const sTriangle &curTri)
 {
     //sPoint P_lightP = sPoint(lightP.x() - P.x(), lightP.y() - P.y(), lightP.z() - P.z());
 
-    for(PoligonUnit &poli_el : allPoli)
+    for(sTriangle &poli_el : allPoli)
     {
-        sTriangle tri_camera(translatePoint_3D_to_camera(poli_el.tri.p1()), 
-                               translatePoint_3D_to_camera(poli_el.tri.p2()), 
-                               translatePoint_3D_to_camera(poli_el.tri.p3()) );
-        if(curTri.equals(tri_camera) == false)
+        if(curTri.equals(poli_el) == false)
         {
             sPoint crossP;
-            bool ifPoliCross = tri_camera.crossLine_and_checkInner(P, lightP, crossP);
+            bool ifPoliCross = poli_el.crossLine_and_checkInner(P, lightP, crossP);
             if(ifPoliCross)
             {
                 // P = P0 + (P1 - P0)*t
@@ -377,7 +387,7 @@ void DrawField::putPointOnScreen(int x, int y, unsigned **display, unsigned colo
             size_t display_x = (size_t)x;
 
             sPoint cam_lightP = translatePoint_3D_to_camera(lightPoint);
-            unsigned shadowColo = shadowtf(crossP, colo, cam_lightP, h_lightPoint, h_ambientLighting, polis, tri);
+            unsigned shadowColo = shadowtf(crossP, colo, cam_lightP, h_lightPoint, h_ambientLighting, cam_polis, tri);
 
             display[H-1-display_y][display_x] = shadowColo;
         }
@@ -551,6 +561,7 @@ void DrawField::putTriangle3D(const sTriangle &tri, unsigned colo)
 {
     PoligonUnit buff = {tri, colo};
     polis.push_back(buff);
+    cam_polis.push_back(tri);
 }
 
 void DrawField::putRectangle3D(const sPoint &lu, const sPoint &ru, const sPoint &ld, const sPoint &rd, unsigned colo)
