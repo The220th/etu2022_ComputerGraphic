@@ -1,4 +1,6 @@
-# etu2022_ComputerGraphic. Временный README.md
+# etu2022_ComputerGraphic
+
+# Компиляция
 
 Используется `QT`:
 
@@ -12,12 +14,21 @@
 > make
 ```
 
-В лабораторных работах: 1, 2, 3, 4, 5, 6 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
+# Использование
+
+[В релизах](https://github.com/The220th/etu2022_ComputerGraphic/releases) можно скачать уже скомпилированные версии для Windows и для GNU/Linux: https://github.com/The220th/etu2022_ComputerGraphic/releases
+
+Отдельное внимание обратить на запуск `lab1`, `lab3` и `lab3ez`.
+
+В каждой работе в папке `imgsrc` есть файлы `calculating*.png`, в которых кратко объясняется теоритический базис. 
+
+Во всех лабораторных работах: 1, 2, 3, 4, 5, 6 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
 
 ## lab1
 
-Выполнены варианты 10 и 11:
 Сформировать отрезки, касательные к двум заданным окружностям с **внутренней** и **внешней** сторон, определив предварительно координаты точек касания. Необходимо предусмотреть возможность редактирования положения и параметры окружностей.
+
+![](./imgsrc/prev_lab1.png)
 
 Для правильной работы, должен быть установлен `Python 3`. На `Linux` добиться того, чтобы `Python` запускался командой `python`, а не `python3`.
 
@@ -35,6 +46,8 @@
 
 Кривая Безье n-го порядка
 
+![](./imgsrc/prev_lab2.png)
+
 ``` bash
 > ./lab2
 ```
@@ -42,6 +55,8 @@
 ## lab3
 
 Поверхность Безье n-го порядка
+
+![](./imgsrc/prev_lab3.png)
 
 ``` bash
 > ./lab3 [порядок]
@@ -54,6 +69,8 @@
 
 Билинейная поверхность
 
+![](./imgsrc/prev_lab3ez.png)
+
 ``` bash
 > ./lab3ez p1_x p1_y p1_z p2_x p2_y p2_z p3_x p3_y p3_z p4_x p4_y p4_z
 
@@ -65,6 +82,8 @@
 
 Алгоритм Кируса-Бека с выпуклым окном.
 
+![](./imgsrc/prev_lab4.png)
+
 ``` bash
 > ./lab4
 ```
@@ -73,6 +92,8 @@
 
 z-buffer
 
+![](./imgsrc/prev_lab5.png)
+
 ``` bash
 > ./lab5
 ```
@@ -80,6 +101,8 @@ z-buffer
 ## lab6
 
 Тень
+
+![](./imgsrc/prev_lab6.png)
 
 ``` bash
 > ./lab6
