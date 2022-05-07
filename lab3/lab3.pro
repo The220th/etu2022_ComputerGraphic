@@ -6,7 +6,7 @@ CONFIG += c++11
 TARGET = lab3
 TEMPLATE = app
 
-QMAKE_CXXFLAGS = -ggdb
+#QMAKE_CXXFLAGS = -ggdb
 
 SOURCES += ./main.cpp \
 ./gui/mainWindow.cpp ./gui/drawField.cpp \
