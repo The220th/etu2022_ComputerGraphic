@@ -6,7 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include <list>
+#include <vector>
 
 #include "../include/drawField.h"
 #include "../include/mainWindow.h"
@@ -44,8 +44,8 @@ DrawField::DrawField(QWidget *parent) : QWidget(parent), cam()
     lightPoint = sPoint(45, 40, 70);
     h_lightPoint = 2;
 
-    polis = list<PoligonUnit>();
-    cam_polis = list<sTriangle>();
+    polis = vector<PoligonUnit>();
+    cam_polis = vector<sTriangle>();
 
     cam.move(50.0, 0.0, 70.0);
 }
@@ -355,16 +355,12 @@ void DrawField::refresh_C_()
         delete C_;
     C_ = new Matrix<double>(C_buff);
 
-
-    // ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы
-    list<PoligonUnit>::iterator it1;
-    list<sTriangle>::iterator it2;
-    for(it1 = polis.begin(), it2 = cam_polis.end(); it1 != polis.end(); ++it1, ++it2)
+    for(size_t i = 0; i < cam_polis.size(); ++i)
     {
-        sTriangle tri_camera(translatePoint_3D_to_camera(it1->tri.p1()), 
-                               translatePoint_3D_to_camera(it1->tri.p2()), 
-                               translatePoint_3D_to_camera(it1->tri.p3()) );
-        *it2 = tri_camera;
+        sTriangle tri_camera(   translatePoint_3D_to_camera(polis[i].tri.p1()), 
+                                translatePoint_3D_to_camera(polis[i].tri.p2()), 
+                                translatePoint_3D_to_camera(polis[i].tri.p3()) );
+        cam_polis[i] = tri_camera;
     }
 }
 
@@ -383,7 +379,7 @@ void DrawField::refresh_z_buffer()
             z_buffer[li][lj] = max_double;
 }
 
-unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::list<sTriangle> &allPoli, const sTriangle &curTri)
+unsigned DrawField::shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::vector<sTriangle> &allPoli, const sTriangle &curTri)
 {
     //sPoint P_lightP = sPoint(lightP.x() - P.x(), lightP.y() - P.y(), lightP.z() - P.z());
 

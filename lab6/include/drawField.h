@@ -6,7 +6,7 @@
 #include <QMouseEvent>
 
 #include <cmath>
-#include <list>
+#include <vector>
 
 #include "../include/sPoint.h"
 #include "../include/sTriangle.h"
@@ -67,8 +67,8 @@ class DrawField : public QWidget
     double h_lightPoint;
     const double h_ambientLighting = /*10*/ sup_getColor(10, 10, 10, 10); // Окружающее освещение
 
-    std::list<PoligonUnit> polis;
-    std::list<sTriangle> cam_polis;
+    std::vector<PoligonUnit> polis;
+    std::vector<sTriangle> cam_polis;
 
   public:
     DrawField(QWidget *parent = 0);
@@ -99,7 +99,7 @@ class DrawField : public QWidget
 
     void printLineFU(int x1, int y1, int x2, int y2, unsigned colo, unsigned **display, double **z_buffer, const sTriangle &tri);
 
-    unsigned shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::list<sTriangle> &allPoli, const sTriangle &curTri);
+    unsigned shadowtf(const sPoint &P, unsigned colo, const sPoint &lightP, double h_lightP, double h_world, std::vector<sTriangle> &allPoli, const sTriangle &curTri);
 
     //void drawPoint(const sPoint& p, QPainter& qp, QColor *colo = 0);
 
