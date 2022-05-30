@@ -4,7 +4,7 @@
 
 Используется `QT`:
 
-- [Установка](https://github.com/The220th/SharedLib/blob/main/cpp/QT/INSTALL.md) <- тык
+- [Установка QT](https://github.com/The220th/SharedLib/blob/main/cpp/QT/INSTALL.md) <- тык
 
 - В директории, где есть файл `что-то.pro` выполнить:
 
@@ -22,7 +22,7 @@
 
 В каждой работе в папке `imgsrc` есть файлы `calculating*.png`, в которых кратко объясняется теоритический базис. 
 
-Во всех лабораторных работах: 1, 2, 3, 4, 5, 6 - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
+Во всех лабораторных работах: 1, 2, 3, 3ez, 4, 5, 5mod, 6, 6mod - для рисования используется **только** функция [`void QPainter::drawPoint(int x, int y)`](https://doc.qt.io/qt-5/qpainter.html#drawPoint-2).
 
 ## lab1
 
@@ -98,6 +98,20 @@ z-buffer
 > ./lab5
 ```
 
+## lab5mod
+
+z-buffer
+
+![](./imgsrc/prev_lab5mod.png)
+
+``` bash
+> ./lab5mod
+```
+
+Управление: стрелочки влево-вправо.
+
+Файлы `calculating*.png` смотри в `lab5`.
+
 ## lab6
 
 Тень
@@ -107,3 +121,17 @@ z-buffer
 ``` bash
 > ./lab6
 ```
+
+## lab6mod
+
+Тень
+
+![](./imgsrc/prev_lab6mod.png)
+
+``` bash
+> ./lab6mod
+```
+
+Управление: стрелочки влево-вправо и AWSDXC (именно английская раскладка).
+
+Файлы `calculating*.png` смотри в `lab6`.
